@@ -1,8 +1,7 @@
+
 fastapi
-uvicorn
+uvicorn[standard]
 groq
-langchain
 langchain-community
 chromadb
 sentence-transformers
-python-multipart
