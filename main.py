@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 from groq import Groq
 from langchain_community.vectorstores import Chroma
@@ -43,6 +44,27 @@ Question: {query.question}
 """
     answer = groq_llm_call(prompt)
     return {"answer": answer}
+
+@app.post("/whatsapp")
+async def whatsapp_webhook(request: Request):
+    form = await request.form()
+    incoming_msg = form["Body"]
+
+    docs = vectorstore.similarity_search(incoming_msg, k=3)
+    context = "\n".join([d.page_content for d in docs])
+    prompt = f"""
+Answer the question using ONLY the context below:
+{context}
+Question: {incoming_msg}
+"""
+    answer = groq_llm_call(prompt)
+
+    # Twilio-compatible XML response
+    response = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>{answer}</Message>
+</Response>"""
+    return PlainTextResponse(content=response, media_type="application/xml")
 
 @app.get("/")
 def root():
