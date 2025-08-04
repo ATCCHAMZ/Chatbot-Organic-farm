@@ -29,7 +29,7 @@ def groq_llm_call(prompt: str) -> str:
         ],
         temperature=0
     )
-    return completion.choices[0].message.content
+    return completion.choices[0].message["content"]
 
 @app.post("/ask")
 async def ask_question(query: Query):
